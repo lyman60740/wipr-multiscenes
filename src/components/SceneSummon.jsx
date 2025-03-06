@@ -5,7 +5,9 @@ import { Physics, RigidBody, useRapier } from "@react-three/rapier";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 
-const MAX_BALLS = 200; // Limite pour améliorer les perfs
+const MAX_BALLS = 20; // Limite pour améliorer les perfs
+
+
 
 function RapierDebugRenderer() {
   const { world } = useRapier();
@@ -71,11 +73,12 @@ function Pentacle() {
     );
   }
 
-  function Goat() {
+  function Goat({ ballCount }) {
     const { scene } = useGLTF("/summon/models/goat.glb");
     const goatRef = useRef();
     const lightRef = useRef();
     const targetRef = useRef();
+    const progress = Math.min(ballCount / MAX_BALLS, 1);
 
     useEffect(() => {
         if (scene) {
@@ -87,6 +90,8 @@ function Pentacle() {
           });
         }
       }, [scene]);
+
+      
 
     // useFrame(() => {
     //   if (goatRef.current) {
@@ -120,35 +125,48 @@ function Pentacle() {
             lightRef.current.target.position.copy(targetRef.current.position);
             lightRef.current.target.updateMatrixWorld();
         }
+
+        if (progress >= 1) {
+          if (goatRef.current) { // ✅ Vérifie que goatRef.current existe
+              goatRef.current.position.z = THREE.MathUtils.lerp(goatRef.current.position.z, -80, 0.002);
+          }
+      }
     });
 
     return (
-      <group ref={goatRef} position={[0, 0, -100]} rotation={[0, 0, 0]}>
-        <primitive object={scene} scale={40} />
-        
-        {/* ✅ Lumière directionnelle pointant vers la chèvre */}
-        <directionalLight 
-          ref={lightRef}
-          intensity={0} 
-          decay={3}
-          distance={30}
-          color="white" 
-          castShadow
-          position={[0, -100, -100]} // 🔥 Position de la lumière au-dessus de la chèvre
-        />
-        
-        {/* ✅ Target invisible pour la lumière */}
-        <mesh ref={targetRef} position={[0, 0, -100]} visible={true}>
+      <>
+      <directionalLight 
+      ref={lightRef}
+      intensity={100} 
+      decay={3}
+      distance={30}
+      color="red" 
+      castShadow
+      position={[0, -50, -100]} // 🔥 Position de la lumière au-dessus de la chèvre
+    />
+    <mesh ref={targetRef} position={[0, 30, -100]} visible={true}>
           <sphereGeometry args={[0.1, 8, 8]} />
           <meshBasicMaterial color="red" />
         </mesh>
+      <group ref={goatRef} position={[0, 0, -150]} rotation={[0, 0, 0]}>
+        <primitive object={scene} scale={40} />
+        
+        {/* ✅ Lumière directionnelle pointant vers la chèvre */}
+       
+        
+        {/* ✅ Target invisible pour la lumière */}
+        
       </group>
+      </>
     );
 }
 
 
-function EstusModel() {
+function EstusModel({ ballCount }) {
   const { scene } = useGLTF("/summon/models/estus1.glb");
+  const flaskRef = useRef();
+  const rigidBodyRef = useRef();
+  const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
     if (scene) {
@@ -170,12 +188,39 @@ function EstusModel() {
     }
   }, [scene]);
 
+  useFrame(() => {
+    if (ballCount === MAX_BALLS && flaskRef.current) {
+      // ✅ Rotation progressive vers le bas
+      flaskRef.current.rotation.x = THREE.MathUtils.lerp(flaskRef.current.rotation.x, Math.PI / 2, 0.05);
+
+      // ✅ Une fois retournée, on la laisse fixe
+      if (flaskRef.current.rotation.x > Math.PI / 3 && !flipped) {
+        setFlipped(true);
+      }
+    }
+  });
+
   return (
-    <RigidBody type="fixed" shape="cuboid" args={[1, 1, 1]} colliders="trimesh">
-      {scene && <primitive object={scene} scale={5.1} position={[-0.5, -3.5, -0.8]} rotation={[0, Math.PI, 0]} />}
+    <RigidBody
+      ref={rigidBodyRef}
+      type="fixed" // ✅ Reste toujours fixe
+      colliders="trimesh" // ✅ Collision plus précise
+      margin={0.05}
+    >
+      {scene && (
+        <primitive
+          ref={flaskRef}
+          object={scene}
+          scale={5.1}
+          position={[-0.5, -3.5, -0.8]}
+          rotation={[0, Math.PI, 0]} // ✅ Début normal
+        />
+      )}
     </RigidBody>
   );
 }
+
+
 
 function Ball({ position, id, removeBall }) {
   const ref = useRef();
@@ -293,8 +338,9 @@ export default function SceneSummon() {
       <Canvas
        style={{ background: "black" }}
         camera={{ position: [0, 0, 5], fov: 50, near: 0.1, far: 200 }}
-        // fog={{ color: "#000000", near: 0, far: 1 }}
+        
         >
+          <fog attach="fog" args={['black', 0, 120]} />
         {/* 🌌 Bloom Effect pour l'ambiance */}
         {/* <EffectComposer>
           <Bloom intensity={0.5} luminanceThreshold={0.2} luminanceSmoothing={0.9} height={300} />
@@ -306,15 +352,15 @@ export default function SceneSummon() {
         <directionalLight decay={3} distance={15} intensity={10.5} color="red" position={[0, -5, 2]} />
 
         <Suspense fallback={null}>
-            <Goat />
+            <Goat ballCount={ballCount}/>
           <group position={[0.3, 0.3, -1]} scale={0.7}>
             <Pentacle />
             <Marmitte />
-            <Physics gravity={[0, -9.81, 0]}>
-              <EstusModel />
+            {/* <Physics gravity={[0, -9.81, 0]}>
+              <EstusModel ballCount={ballCount}/>
               <BallSpawner setBallCount={setBallCount} />
               <RapierDebugRenderer />
-            </Physics>
+            </Physics> */}
           </group>
         </Suspense>
         <OrbitControls />
