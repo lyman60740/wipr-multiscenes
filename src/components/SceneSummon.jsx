@@ -1,13 +1,50 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Environment, Lightformer, MeshTransmissionMaterial } from "@react-three/drei";
+import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
+import { OrbitControls, useGLTF, Environment, useAnimations } from "@react-three/drei";
 import { Suspense, useRef, useState, useEffect } from "react";
 import { Physics, RigidBody, useRapier } from "@react-three/rapier";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
+import VoteSacrifice from "./VoteSacrifice";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
+import fontData from "three/examples/fonts/helvetiker_regular.typeface.json"; // Police par défaut
+
+extend({ TextGeometry });
 
 const MAX_BALLS = 20; // Limite pour améliorer les perfs
 
+function CharacterWithMixamoAnimation() {
+  // Charger le personnage GLB
+  const { scene: character, animations: characterAnims } = useGLTF("/summon/models/viper-rig.glb");
+  // Charger l'animation GLB
+  const { scene: animScene, animations: anims } = useGLTF("/summon/models/animations/break-dance.glb");
 
+  const mixerRef = useRef();
+
+  useEffect(() => {
+    if (!anims.length) return;
+
+    const mixer = new THREE.AnimationMixer(character);
+    mixerRef.current = mixer;
+
+    // Prendre la première animation de Mixamo
+    const action = mixer.clipAction(anims[0]);
+    action.play();
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      mixer.update(0.016); // Avance l'animation (16ms ≈ 60FPS)
+    };
+
+    animate();
+  }, [anims, character]);
+
+  return (
+
+      <primitive object={character} position={[0, -1, 0]} />
+      
+  );
+}
 
 function RapierDebugRenderer() {
   const { world } = useRapier();
@@ -221,7 +258,6 @@ function EstusModel({ ballCount }) {
 }
 
 
-
 function Ball({ position, id, removeBall }) {
   const ref = useRef();
 
@@ -323,23 +359,26 @@ function RotatingLight({ ballCount }) {
   
   
 export default function SceneSummon() {
+  const [sacrified, setSacrified] = useState(null);
   const [ballCount, setBallCount] = useState(0);
+
+  const handleSacrifice = (pseudo) => {
+    setSacrified(pseudo);
+    // Ici tu déclenches ton animation 
+  };
 
   return (
     <>
       {/* 🏆 Compteur de billes */}
-      <div style={{
-        position: "absolute", top: 10, left: 10, color: "white", fontSize: "20px",
-        background: "rgba(0, 0, 0, 0.5)", padding: "5px 10px", borderRadius: "5px", zIndex: 99
-      }}>
-        Billes : {ballCount} / {MAX_BALLS}
-      </div>
+      
+      <VoteSacrifice onSacrifice={(pseudo) => handleSacrifice(pseudo)} />
 
       <Canvas
        style={{ background: "black" }}
         camera={{ position: [0, 0, 5], fov: 50, near: 0.1, far: 200 }}
         
         >
+       
           <fog attach="fog" args={['black', 0, 120]} />
         {/* 🌌 Bloom Effect pour l'ambiance */}
         {/* <EffectComposer>
@@ -351,8 +390,17 @@ export default function SceneSummon() {
         {/* <ambientLight intensity={1.5} /> */}
         <directionalLight decay={3} distance={15} intensity={10.5} color="red" position={[0, -5, 2]} />
 
+
+        {sacrified && (
+          <mesh position={[-0.5, -4.5, -1.5]}>
+            <textGeometry args={[sacrified, { font: new FontLoader().parse(fontData), size: 0.5, height: 0.1 }]} />
+            <meshStandardMaterial color="red" emissive="red" />
+          </mesh>
+        )}
+        
         <Suspense fallback={null}>
             <Goat ballCount={ballCount}/>
+            {/* <CharacterWithMixamoAnimation /> */}
           <group position={[0.3, 0.3, -1]} scale={0.7}>
             <Pentacle />
             <Marmitte />
