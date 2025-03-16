@@ -1,6 +1,8 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+
 export function useTwitchChat(onMessageReceived) {
     useEffect(() => {
-      const eventSource = new EventSource("https://wipr-multiscenes-back.vercel.app/stream-chat");
+      const eventSource = new EventSource("https://wipr-multiscenes-back.onrender.com/stream-chat");
   
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);

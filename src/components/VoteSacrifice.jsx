@@ -8,7 +8,7 @@ export function VoteMessages3D({ onSacrifice }) {
   const [voteCount, setVoteCount] = useState({});
   const [topVotes, setTopVotes] = useState([]);
   const [sacrified, setSacrified] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(40);
   const [showRanking, setShowRanking] = useState(true);
   const [chronoOpacity, setChronoOpacity] = useState(1);
   const [sacrifiedOpacity, setSacrifiedOpacity] = useState(0);

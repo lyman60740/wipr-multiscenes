@@ -78,13 +78,14 @@ export function Pentacle() {
     if (pentacleRef.current && startTime.current !== null) {
       const elapsed = (Date.now() - startTime.current) / 1000; // en secondes
       let rotationSpeed;
+      const chrono = 40
 
-      if (elapsed <= 10) {
+      if (elapsed <= chrono) {
         // Accélération exponentielle durant les 10 premières secondes
-        rotationSpeed = THREE.MathUtils.lerp(0.2, 12, Math.pow(elapsed / 10, 3));
-      } else if (elapsed > 10 && elapsed <= 12) {
+        rotationSpeed = THREE.MathUtils.lerp(0.2, 12, Math.pow(elapsed / chrono, 3));
+      } else if (elapsed > chrono && elapsed <= 12) {
         // Décélération progressive sur les 2 secondes suivantes
-        const decelProgress = (elapsed - 10) / 2; // 0 à 1
+        const decelProgress = (elapsed - chrono) / 2; // 0 à 1
         rotationSpeed = THREE.MathUtils.lerp(12, 0, decelProgress * decelProgress);
       } else {
         rotationSpeed = 0; // Arrêt complet après 12 secondes
