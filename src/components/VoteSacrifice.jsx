@@ -12,27 +12,29 @@ export function VoteMessages3D({ onSacrifice }) {
   const [showRanking, setShowRanking] = useState(true);
   const [chronoOpacity, setChronoOpacity] = useState(1);
   const [sacrifiedOpacity, setSacrifiedOpacity] = useState(0);
-  const [votesEnabled, setVotesEnabled] = useState(true); // Nouvel état
+  const [votesEnabled, setVotesEnabled] = useState(true);
 
   const handleChatMessage = useCallback((message, user) => {
-    if (!votesEnabled) return; // Ne plus accepter les votes après la fin du chrono
-
-    console.log(`Message reçu de ${user}: ${message}`);
+    if (!votesEnabled) return;
 
     const match = message.match(/^!(sacrifice|sacrifie)\s+@?(\w+)/i);
     if (match) {
       const pseudo = match[2];
       const id = Date.now() + Math.random();
       const x = Math.random() * 15 - 7.5;
-      const newVote = { id, pseudo, time: Date.now(), x };
 
-      setVotes(prev => [...prev, newVote]);
+      setVotes(prevVotes => [
+        ...prevVotes,
+        { id, pseudo, time: Date.now(), x }
+      ]);
+
       setVoteCount(prev => {
         const updated = { ...prev, [pseudo]: (prev[pseudo] || 0) + 1 };
-        const sorted = Object.entries(updated)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3);
-        setTopVotes(sorted);
+        setTopVotes(
+          Object.entries(updated)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+        );
         return updated;
       });
 
@@ -52,15 +54,18 @@ export function VoteMessages3D({ onSacrifice }) {
   }, []);
 
   useEffect(() => {
-    if (timeLeft === 0 && topVotes.length > 0) {
+    if (timeLeft === 0) {
       setShowRanking(false);
-      setVotesEnabled(false); // Bloque les nouveaux votes et l'affichage des existants
-      setVotes([]); // Supprime immédiatement les votes existants à l'écran
-      const victime = topVotes[0][0];
-      setSacrified(victime);
-      onSacrifice(victime);
-      setChronoOpacity(0);
-      setSacrifiedOpacity(1);
+      setVotesEnabled(false);
+      setVotes([]);
+
+      if (topVotes.length > 0) {
+        const victime = topVotes[0][0];
+        setSacrified(victime);
+        onSacrifice(victime);
+        setChronoOpacity(0);
+        setSacrifiedOpacity(1);
+      }
     }
   }, [timeLeft, topVotes, onSacrifice]);
 
@@ -121,11 +126,13 @@ function VoteMessage3D({ vote }) {
   const startTime = vote.time;
 
   useFrame(() => {
-    const elapsed = (Date.now() - startTime) / 1000;
-    if (elapsed < 2) {
-      ref.current.position.y = -2 + (elapsed / 2) * 2;
-      ref.current.material.opacity = 1 - elapsed / 2;
-      ref.current.material.transparent = true;
+    if (ref.current) {
+      const elapsed = (Date.now() - startTime) / 1000;
+      if (elapsed < 2) {
+        ref.current.position.y = -2 + (elapsed / 2) * 2;
+        ref.current.material.opacity = 1 - elapsed / 2;
+        ref.current.material.transparent = true;
+      }
     }
   });
 
