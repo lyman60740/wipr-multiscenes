@@ -227,6 +227,10 @@ export function Pentacle() {
     const [advanceGoat, setAdvanceGoat] = useState(false); // nouvel état pour avancer la goat
     const [timeLeft, setTimeLeft] = useState(10);
 
+    useEffect(() => {
+      console.log("scene monté");
+    }, []);
+
     const handleSacrifice = (pseudo) => {
       setSacrified(pseudo);
       setAdvanceGoat(true); // déclenche le déplacement de la goat
@@ -299,8 +303,8 @@ export function Pentacle() {
                 castShadow
               />
             </group>
-            <VoteMessages3D onSacrifice={handleSacrifice} />
           </Suspense>
+            <VoteMessages3D onSacrifice={handleSacrifice} />
           <OrbitControls />
           {/* <FirstPersonControls movementSpeed={1} lookSpeed={0.1} /> */}
         </Canvas>

@@ -3,11 +3,13 @@ import { useEffect, useRef } from "react";
 export function useTwitchChat(onMessageReceived) {
   const callbackRef = useRef(onMessageReceived);
 
-  // Met à jour la référence du callback quand il change
+  // Met à jour toujours la référence du callback
   useEffect(() => {
     callbackRef.current = onMessageReceived;
   }, [onMessageReceived]);
-
+  useEffect(() => {
+    console.log("useTwitchChat monté");
+  }, []);
   useEffect(() => {
     const eventSource = new EventSource("https://wipr-multiscenes-back.onrender.com/stream-chat");
 
@@ -16,13 +18,16 @@ export function useTwitchChat(onMessageReceived) {
       callbackRef.current(data.message, data.user);
     };
 
-    eventSource.onmessage = handleMessage;
+    eventSource.addEventListener("message", handleMessage);
 
     eventSource.onerror = (error) => {
       console.error("Erreur de connexion SSE :", error);
       eventSource.close();
     };
 
-    return () => eventSource.close();
+    return () => {
+      eventSource.removeEventListener("message", handleMessage);
+      eventSource.close();
+    };
   }, []);
 }

@@ -14,6 +14,10 @@ export function VoteMessages3D({ onSacrifice }) {
   const [sacrifiedOpacity, setSacrifiedOpacity] = useState(0);
   const [votesEnabled, setVotesEnabled] = useState(true);
 
+  useEffect(() => {
+    console.log("vote monté");
+  }, []);
+
   const handleChatMessage = useCallback((message, user) => {
     if (!votesEnabled) return;
 
