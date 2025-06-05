@@ -66,7 +66,7 @@ function CharacterWithMixamoAnimation() {
           child.castShadow = true
           child.receiveShadow = true
         }
-        console.log("hell arena child :", child);
+
       })
     })
   
@@ -249,38 +249,34 @@ function Pentacle() {
     );
   }
   
-  function CameraLerp({ setCameraTraveling, audioRef }) {
+function CameraLerp({ setCameraTraveling, audioRef, setStartVotes, startCameraLerp }) {
   const { camera } = useThree();
   const targetPos = new THREE.Vector3(0, -1, 5);
-  const startPos = new THREE.Vector3(5, 3, 15); // position stylée de départ
+  const startPos = new THREE.Vector3(5, 150, 150);
 
   useFrame(() => {
-    if (!camera.userData.traveling) return;
+   if (!startCameraLerp) return;
 
-    camera.position.lerp(targetPos, 0.02);
-
-    const distance = camera.position.distanceTo(targetPos);
-    if (distance < 0.1) {
+    camera.position.lerp(targetPos, 0.005);
+    if (camera.position.distanceTo(targetPos) < 0.1) {
       camera.position.copy(targetPos);
       camera.userData.traveling = false;
       setCameraTraveling(false);
-      audioRef.current?.play();
-
-      // Disparition du texte après 6s
-      setTimeout(() => {
-        const el = document.getElementById("intro-text");
-        if (el) el.style.opacity = 0;
-      }, 6000);
+      if (audioRef.current?.paused) {
+  audioRef.current.play().catch(err => console.warn("Audio bloqué :", err));
+}
+      setStartVotes(true); // 🚀 autorise le chrono
     }
   });
 
   useEffect(() => {
-    camera.position.copy(startPos);
-    camera.userData.traveling = true;
-  }, []);
+  camera.position.copy(startPos);
+}, []);
+
 
   return null;
 }
+
 
 
   
@@ -291,17 +287,42 @@ const [advanceGoat, setAdvanceGoat] = useState(false);
 const [timeLeft, setTimeLeft] = useState(10);
 const [showIntroText, setShowIntroText] = useState(true); // 👈 ICI
 const [cameraTraveling, setCameraTraveling] = useState(true);
+const [startCameraLerp, setStartCameraLerp] = useState(false);
+const [showScene, setShowScene] = useState(false);
+const [startVotes, setStartVotes] = useState(false);
+const [isSceneReady, setIsSceneReady] = useState(false); // 👈 pour charger sans afficher
+const [sceneOpacity, setSceneOpacity] = useState(0);
 
 
 
 useEffect(() => {
+  // Création et démarrage audio dès apparition du message
   audioRef.current = new Audio("/assets/chant.mp3");
+  audioRef.current.volume = 0.5;
+
+  audioRef.current.play().catch((e) => {
+    console.warn("Lecture audio bloquée jusqu'à interaction utilisateur :", e);
+  });
+
+  // Charge la scène mais ne l'affiche qu'après 6s
+  setIsSceneReady(true); // démarre le rendu Three.js
+  setTimeout(() => {
+  setStartCameraLerp(true); // <--- Ajout ici
+  const el = document.getElementById("intro-text");
+  if (el) el.style.opacity = 0;
+
+  setTimeout(() => {
+    setShowIntroText(false);
+    setShowScene(true);
+    setTimeout(() => {
+      setSceneOpacity(1);
+    }, 50);
+  }, 1000);
+}, 6000);
+
 }, []);
 
 
-    useEffect(() => {
-      console.log("scene monté");
-    }, []);
 
     const handleSacrifice = (pseudo) => {
       setSacrified(pseudo);
@@ -325,10 +346,18 @@ useEffect(() => {
     pointerEvents: "none",
     zIndex: 1000
   }}>
-    Le rituel va commencer. Préparez-vous à voter...
+    El Diablo demande un sacrifice... <br/> Votez pour le wipsiti à sacrifier en écrivant : "!sacrifie pseudo"
   </div>
 )}
-        <Canvas
+{isSceneReady && (
+  <div
+  style={{
+    opacity: showScene ? sceneOpacity : 0,
+    transition: "opacity 1.5s ease-in-out",
+    pointerEvents: showScene ? "auto" : "none"
+  }}
+>
+    <Canvas
           style={{ background: "black" }}
           gl={{ physicallyCorrectLights: true }}
           camera={{ position: [0, -1, 5], fov: 65, near: 0.1, far: 200 }}
@@ -367,7 +396,12 @@ useEffect(() => {
             position={[0, -3, 5]}
           /> */}
           <Suspense fallback={null}>
-            <CameraLerp setCameraTraveling={setCameraTraveling} audioRef={audioRef} />
+            <CameraLerp
+  setCameraTraveling={setCameraTraveling}
+  audioRef={audioRef}
+  setStartVotes={setStartVotes}
+  startCameraLerp={startCameraLerp}
+/>
             {/* Passage de la prop advanceGoat à Goat */}
             <HellArena />
             <Goat  advanceGoat={advanceGoat} />
@@ -397,10 +431,14 @@ useEffect(() => {
               />
             </group>
           </Suspense>
-            <VoteMessages3D onSacrifice={handleSacrifice} />
+            <VoteMessages3D onSacrifice={handleSacrifice} startVotes={startVotes} />
           <OrbitControls />
           {/* <FirstPersonControls movementSpeed={1} lookSpeed={0.1} /> */}
         </Canvas>
+  </div>
+)}
+
+       
       </>
     );
   }

@@ -1,0 +1,33 @@
+.selector {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  gap: 30px;
+}
+
+.selector button:nth-child(1), .selector button:nth-child(3) {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.selector button {
+  background: #111;
+  border: 2px solid white;
+  color: white;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.selector button:hover {
+  background: #444;
+}

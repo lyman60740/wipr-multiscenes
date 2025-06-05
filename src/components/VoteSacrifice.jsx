@@ -4,20 +4,28 @@ import { useFrame } from "@react-three/fiber";
 import { useTwitchChat } from "./useTwitchChat";
 import { FlameEffect } from "./FlameEffect.jsx";
 
-export function VoteMessages3D({ onSacrifice }) {
+export function VoteMessages3D({ onSacrifice, startVotes }) {
   const [votes, setVotes] = useState([]);
   const [voteCount, setVoteCount] = useState({});
   const [topVotes, setTopVotes] = useState([]);
   const [sacrified, setSacrified] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(40);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [showRanking, setShowRanking] = useState(true);
   const [chronoOpacity, setChronoOpacity] = useState(1);
   const [sacrifiedOpacity, setSacrifiedOpacity] = useState(0);
   const [votesEnabled, setVotesEnabled] = useState(true);
+  const [chronoStarted, setChronoStarted] = useState(false);
 
-  useEffect(() => {
-    console.log("vote monté");
-  }, []);
+useEffect(() => {
+  if (!startVotes || chronoStarted) return;
+  setChronoStarted(true);
+
+  const timer = setInterval(() => {
+    setTimeLeft(prev => Math.max(prev - 1, 0));
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [startVotes]);
 
   const handleChatMessage = useCallback((message, user) => {
     if (!votesEnabled) return;
