@@ -32,7 +32,7 @@ useEffect(() => {
 
     console.log("Message votesacrifice reçu :", message);
 
-    const match = message.match(/^!(sacrifice|sacrifie)\s+@?(\w+)/i);
+    const match = message.match(/^!(sacrifie)\s+@(\w+)/i);
     if (match) {
       const pseudo = match[2];
       const id = Date.now() + Math.random();

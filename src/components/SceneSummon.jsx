@@ -382,14 +382,22 @@ const resetScene = () => {
     transform: "translate(-50%, -50%)",
     color: "white",
     fontSize: "2rem",
-    fontFamily: "serif",
+    font:"/fonts/JoesfinSans-Regular.ttf",
     textAlign: "center",
     opacity: cameraTraveling ? 1 : 0,
     transition: "opacity 1s ease-in-out",
     pointerEvents: "none",
     zIndex: 1000
   }}>
-    Pour prêter son pouvoir à Zerance, El Diablo demande un sacrifice... <br/> Votez pour le wipsiti qui se fera ban en écrivant : "!sacrifie pseudo"
+    Pour prêter son pouvoir à Zerance, El Diablo demande un sacrifice... <br/> Votez pour le wipsiti qui se fera ban en écrivant : <br/>
+    <span style={{
+      color: "white",
+    fontSize: "2rem",
+    font:"/fonts/JoesfinSans-Regular.ttf",
+    fontWeight: "700",
+    }}>
+    "!sacrifie @pseudo"
+    </span>
   </div>
 )}
 {isSceneReady && (
@@ -421,13 +429,13 @@ const resetScene = () => {
     right: "20px",
     color: "white",
     fontSize: "20px",
-    fontFamily: "serif",
+    font:"/fonts/JoesfinSans-Regular.ttf",
     opacity: showScene ? 1 : 0,
     transition: "opacity 1s ease-in-out",
     pointerEvents: "none",
     zIndex: 1000
   }}>
-    Commande de vote : "!sacrifie pseudo"<br/>
+    Commande de vote : "!sacrifie @pseudo"<br/>
   </div>
   </>
 )}
