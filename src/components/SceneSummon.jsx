@@ -196,23 +196,23 @@ function Pentacle() {
       }
     }, [scene]);
 
-    useFrame(() => {
-      if (goatRef.current) {
-        goatRef.current.traverse((child) => {
-          if (child.isMesh) {
-            child.material = new THREE.MeshPhysicalMaterial({
-              color: new THREE.Color("gray"),
+    // useFrame(() => {
+    //   if (goatRef.current) {
+    //     goatRef.current.traverse((child) => {
+    //       if (child.isMesh) {
+    //         child.material = new THREE.MeshPhysicalMaterial({
+    //           color: new THREE.Color("gray"),
               
-              emissiveIntensity: Math.min(2, 3),
-              roughness: 0.5, // Surface lisse pour reflet
-              metalness: 1, // Effet métallique
-              clearcoat: 1, // Ajoute une couche de vernis
-              clearcoatRoughness: 0, // Garde le vernis très brillant
-            });
-          }
-        });
-      }
-    });
+    //           emissiveIntensity: Math.min(2, 3),
+    //           roughness: 0.5, // Surface lisse pour reflet
+    //           metalness: 1, // Effet métallique
+    //           clearcoat: 1, // Ajoute une couche de vernis
+    //           clearcoatRoughness: 0, // Garde le vernis très brillant
+    //         });
+    //       }
+    //     });
+    //   }
+    // });
   
     useFrame(() => {
       if (lightRef.current && goatRef.current) {
@@ -292,8 +292,16 @@ const [showScene, setShowScene] = useState(false);
 const [startVotes, setStartVotes] = useState(false);
 const [isSceneReady, setIsSceneReady] = useState(false); // 👈 pour charger sans afficher
 const [sceneOpacity, setSceneOpacity] = useState(0);
+const [voteEnded, setVoteEnded] = useState(false);
 
-
+useEffect(() => {
+  if (startVotes) {
+    const timer = setTimeout(() => {
+      setVoteEnded(true);
+    }, 40000); // vote dure 40s ?
+    return () => clearTimeout(timer);
+  }
+}, [startVotes]);
 
 useEffect(() => {
   // Création et démarrage audio dès apparition du message
@@ -322,6 +330,41 @@ useEffect(() => {
 
 }, []);
 
+const resetScene = () => {
+  setSacrified(null);
+  setAdvanceGoat(false);
+  setTimeLeft(10);
+  setShowIntroText(true);
+  setCameraTraveling(true);
+  setStartCameraLerp(false);
+  setShowScene(false);
+  setStartVotes(false);
+  setIsSceneReady(false);
+  setSceneOpacity(0);
+  setVoteEnded(false);
+
+  // Relancer l’intro
+  setTimeout(() => {
+    audioRef.current = new Audio("/assets/chant.mp3");
+    audioRef.current.volume = 0.5;
+    audioRef.current.play().catch((e) =>
+      console.warn("Lecture audio bloquée :", e)
+    );
+    setIsSceneReady(true);
+    setStartCameraLerp(true);
+
+    setTimeout(() => {
+      const el = document.getElementById("intro-text");
+      if (el) el.style.opacity = 0;
+
+      setTimeout(() => {
+        setShowIntroText(false);
+        setShowScene(true);
+        setTimeout(() => setSceneOpacity(1), 50);
+      }, 1000);
+    }, 6000);
+  }, 100); // petit délai pour "remonter" proprement
+};
 
 
     const handleSacrifice = (pseudo) => {
@@ -346,10 +389,50 @@ useEffect(() => {
     pointerEvents: "none",
     zIndex: 1000
   }}>
-    El Diablo demande un sacrifice... <br/> Votez pour le wipsiti à sacrifier en écrivant : "!sacrifie pseudo"
+    Pour prêter son pouvoir à Zerance, El Diablo demande un sacrifice... <br/> Votez pour le wipsiti qui se fera ban en écrivant : "!sacrifie pseudo"
   </div>
 )}
 {isSceneReady && (
+  <>
+  <button
+    onClick={resetScene}
+    style={{
+      position: "absolute",
+      bottom: "1rem",
+      left: "20px",
+
+      padding: "1rem 2rem",
+      fontSize: "20px",
+      backgroundColor: "white",
+      color: "black",
+      border: "none",
+      borderRadius: "8px",
+      cursor: "pointer",
+      zIndex: 1000,
+      opacity: showScene ? 1 : 0,
+      transition: "opacity 0.5s ease",
+    }}
+  >
+    🔁 Relancer le vote
+  </button>
+<div style={{
+    position: "absolute",
+    bottom: "20px",
+    right: "20px",
+    color: "white",
+    fontSize: "20px",
+    fontFamily: "serif",
+    opacity: showScene ? 1 : 0,
+    transition: "opacity 1s ease-in-out",
+    pointerEvents: "none",
+    zIndex: 1000
+  }}>
+    Commande de vote : "!sacrifie pseudo"<br/>
+  </div>
+  </>
+)}
+{isSceneReady && (
+  
   <div
   style={{
     opacity: showScene ? sceneOpacity : 0,
@@ -362,27 +445,13 @@ useEffect(() => {
           gl={{ physicallyCorrectLights: true }}
           camera={{ position: [0, -1, 5], fov: 65, near: 0.1, far: 200 }}
         >
+
+
+
           <fog attach="fog" args={['black', 0, 120]} />
           <Environment preset="night" />
           {/* <ambientLight intensity={0.5}/> */}
-          <directionalLight
-        intensity={0.5}
-        color="white"
-        castShadow
-        position={[3, -2, 0]}
-           // Angle du cône du spotlight
-        penumbra={0.8}         // Adoucit les bords du cône
-        distance={20}
-      />
-       <directionalLight
-        intensity={0.5}
-        color="white"
-        castShadow
-        position={[-3, -2, 0]}
-           // Angle du cône du spotlight
-        penumbra={0.8}         // Adoucit les bords du cône
-        distance={20}
-      />
+         
 
 <EffectComposer>
         <Bloom mipmapBlur luminanceThreshold={0.6} radius={0.2} />
