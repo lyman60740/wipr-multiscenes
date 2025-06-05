@@ -16,21 +16,19 @@ export function VoteMessages3D({ onSacrifice, startVotes }) {
   const [votesEnabled, setVotesEnabled] = useState(true);
   const [chronoStarted, setChronoStarted] = useState(false);
 
-useEffect(() => {
-  if (!startVotes || chronoStarted) return;
-  setChronoStarted(true);
+// useEffect(() => {
+//   if (!startVotes || chronoStarted) return;
+//   setChronoStarted(true);
 
-  const timer = setInterval(() => {
-    setTimeLeft(prev => Math.max(prev - 1, 0));
-  }, 1000);
+//   const timer = setInterval(() => {
+//     setTimeLeft(prev => Math.max(prev - 1, 0));
+//   }, 1000);
 
-  return () => clearInterval(timer);
-}, [startVotes]);
+//   return () => clearInterval(timer);
+// }, [startVotes]);
 
   const handleChatMessage = useCallback((message, user) => {
     if (!votesEnabled) return;
-
-    console.log("Message votesacrifice reçu :", message);
 
     const match = message.match(/^!(sacrifie)\s+@(\w+)/i);
     if (match) {
@@ -69,20 +67,20 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-    if (timeLeft === 0) {
-      setShowRanking(false);
-      setVotesEnabled(false);
-      setVotes([]);
+  if (timeLeft === 0) {
+    setVotesEnabled(false);
+    setVotes([]);
 
-      if (topVotes.length > 0) {
-        const victime = topVotes[0][0];
-        setSacrified(victime);
-        onSacrifice(victime);
-        setChronoOpacity(0);
-        setSacrifiedOpacity(1);
-      }
+    if (topVotes.length > 0) {
+      const victime = topVotes[0][0];
+      setSacrified(victime);
+      onSacrifice(victime);
+      setChronoOpacity(0);
+      setSacrifiedOpacity(1);
     }
-  }, [timeLeft, topVotes, onSacrifice]);
+  }
+}, [timeLeft, topVotes, onSacrifice]);
+
 
   return (
     <group>

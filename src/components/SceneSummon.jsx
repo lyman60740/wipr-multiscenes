@@ -107,7 +107,7 @@ function Pentacle() {
     if (pentacleRef.current && startTime.current !== null) {
       const elapsed = (Date.now() - startTime.current) / 1000; // en secondes
       let rotationSpeed;
-      const chrono = 40
+      const chrono = 60
 
       if (elapsed <= chrono) {
         // Accélération exponentielle durant les 10 premières secondes
