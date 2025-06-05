@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useTwitchChat } from "./useTwitchChat";
+import { FlameEffect } from "./FlameEffect.jsx";
 
 export function VoteMessages3D({ onSacrifice }) {
   const [votes, setVotes] = useState([]);
@@ -20,6 +21,8 @@ export function VoteMessages3D({ onSacrifice }) {
 
   const handleChatMessage = useCallback((message, user) => {
     if (!votesEnabled) return;
+
+    console.log("Message votesacrifice reçu :", message);
 
     const match = message.match(/^!(sacrifice|sacrifie)\s+@?(\w+)/i);
     if (match) {
@@ -81,8 +84,8 @@ export function VoteMessages3D({ onSacrifice }) {
 
       {sacrified && (
         <Text
-          position={[0, -.3, -1.5]}
-          fontSize={0.30}
+          position={[0, 0, -1.5]}
+          fontSize={0.7}
           color="white"
           anchorX="center"
           anchorY="center"
@@ -100,7 +103,7 @@ export function VoteMessages3D({ onSacrifice }) {
             Classement :
           </Text>
           {topVotes.map(([pseudo, count], index) => (
-            <Text key={pseudo} position={[0, -(index + 1) * 0.2, 0]} fontSize={0.15} color="white" anchorX="left" anchorY="middle" font="/fonts/CloisterBlack.ttf">
+            <Text key={pseudo} position={[0, -(index + 1) * 0.2, 0]} fontSize={0.30} color="white" anchorX="left" anchorY="middle" font="/fonts/CloisterBlack.ttf">
               {index + 1}. {pseudo} : {count} vote{count > 1 ? "s" : ""}
             </Text>
           ))}
@@ -108,6 +111,7 @@ export function VoteMessages3D({ onSacrifice }) {
       )}
 
       {showRanking && (
+        <>
         <Text
           position={[-0.06, -.1, -1.7]}
           fontSize={0.7}
@@ -120,6 +124,8 @@ export function VoteMessages3D({ onSacrifice }) {
         >
           {timeLeft}
         </Text>
+        {/* <FlameEffect /> */}
+        </>
       )}
     </group>
   );
@@ -133,7 +139,7 @@ function VoteMessage3D({ vote }) {
     if (ref.current) {
       const elapsed = (Date.now() - startTime) / 1000;
       if (elapsed < 2) {
-        ref.current.position.y = -2 + (elapsed / 2) * 2;
+        ref.current.position.y = 0 + (elapsed / 2) * 2;
         ref.current.material.opacity = 1 - elapsed / 2;
         ref.current.material.transparent = true;
       }
@@ -141,8 +147,8 @@ function VoteMessage3D({ vote }) {
   });
 
   return (
-    <Text ref={ref} position={[vote.x, -2, -2]} fontSize={0.15} color="red" anchorX="center" anchorY="middle" font="/fonts/CloisterBlack.ttf">
-      {vote.pseudo} +1 🔥
+    <Text ref={ref} position={[vote.x * 1.2, 0, -5]} fontSize={0.70} color="red" anchorX="center" anchorY="middle" font="/fonts/CloisterBlack.ttf">
+      {vote.pseudo}
     </Text>
   );
 }

@@ -6,6 +6,7 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import {VoteMessages3D} from "./VoteSacrifice";
 import {PictureFrame} from "./PictureFrame";
+import { FlameEffect } from "./FlameEffect.jsx";
 
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
@@ -17,6 +18,8 @@ extend({ TextGeometry });
 
 const MAX_BALLS = 20; // Limite pour améliorer les perfs
 const font = new FontLoader().parse(fontData);
+
+
 
 function CharacterWithMixamoAnimation() {
   // Charger le personnage GLB
@@ -51,9 +54,35 @@ function CharacterWithMixamoAnimation() {
   );
 }
 
+ function HellArena() {
+    const { scene } = useGLTF("/summon/models/hell_arena1.glb")
+    const hellArenaRef = useRef()
+  
+    useEffect(() => {
+      if (!hellArenaRef.current) return
+  
+      hellArenaRef.current.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true
+          child.receiveShadow = true
+        }
+        console.log("hell arena child :", child);
+      })
+    })
+  
+    return (
+      <group
+        ref={hellArenaRef}
+        position={[-0.5, -10, -1.5]}
+        rotation={[0, Math.PI / 4, 0]}
+      >
+        <primitive object={scene} scale={7.0} />
+      </group>
+    )
+  }
 
 
-export function Pentacle() {
+function Pentacle() {
   const pentacleRef = useRef();
   const startTime = useRef(null);
 
@@ -167,23 +196,23 @@ export function Pentacle() {
       }
     }, [scene]);
 
-    // useFrame(() => {
-    //   if (goatRef.current) {
-    //     goatRef.current.traverse((child) => {
-    //       if (child.isMesh) {
-    //         child.material = new THREE.MeshPhysicalMaterial({
-    //           color: new THREE.Color("gray"),
+    useFrame(() => {
+      if (goatRef.current) {
+        goatRef.current.traverse((child) => {
+          if (child.isMesh) {
+            child.material = new THREE.MeshPhysicalMaterial({
+              color: new THREE.Color("gray"),
               
-    //           emissiveIntensity: Math.min(2, 3),
-    //           roughness: 0.5, // Surface lisse pour reflet
-    //           metalness: 1, // Effet métallique
-    //           clearcoat: 1, // Ajoute une couche de vernis
-    //           clearcoatRoughness: 0, // Garde le vernis très brillant
-    //         });
-    //       }
-    //     });
-    //   }
-    // });
+              emissiveIntensity: Math.min(2, 3),
+              roughness: 0.5, // Surface lisse pour reflet
+              metalness: 1, // Effet métallique
+              clearcoat: 1, // Ajoute une couche de vernis
+              clearcoatRoughness: 0, // Garde le vernis très brillant
+            });
+          }
+        });
+      }
+    });
   
     useFrame(() => {
       if (lightRef.current && goatRef.current) {
@@ -213,19 +242,62 @@ export function Pentacle() {
           <sphereGeometry args={[0.1, 8, 8]} />
           <meshBasicMaterial color="red" />
         </mesh>
-        <group ref={goatRef} position={[0, 0, -150]} rotation={[0, 0, 0]}>
+        <group ref={goatRef} position={[0, 20, -150]} rotation={[Math.PI * 0.1, 0, 0]}>
           <primitive object={scene} scale={40} />
         </group>
       </>
     );
   }
   
+  function CameraLerp({ setCameraTraveling, audioRef }) {
+  const { camera } = useThree();
+  const targetPos = new THREE.Vector3(0, -1, 5);
+  const startPos = new THREE.Vector3(5, 3, 15); // position stylée de départ
+
+  useFrame(() => {
+    if (!camera.userData.traveling) return;
+
+    camera.position.lerp(targetPos, 0.02);
+
+    const distance = camera.position.distanceTo(targetPos);
+    if (distance < 0.1) {
+      camera.position.copy(targetPos);
+      camera.userData.traveling = false;
+      setCameraTraveling(false);
+      audioRef.current?.play();
+
+      // Disparition du texte après 6s
+      setTimeout(() => {
+        const el = document.getElementById("intro-text");
+        if (el) el.style.opacity = 0;
+      }, 6000);
+    }
+  });
+
+  useEffect(() => {
+    camera.position.copy(startPos);
+    camera.userData.traveling = true;
+  }, []);
+
+  return null;
+}
+
 
   
   export default function SceneSummon() {
+    const audioRef = useRef();
     const [sacrified, setSacrified] = useState(null);
-    const [advanceGoat, setAdvanceGoat] = useState(false); // nouvel état pour avancer la goat
-    const [timeLeft, setTimeLeft] = useState(10);
+const [advanceGoat, setAdvanceGoat] = useState(false);
+const [timeLeft, setTimeLeft] = useState(10);
+const [showIntroText, setShowIntroText] = useState(true); // 👈 ICI
+const [cameraTraveling, setCameraTraveling] = useState(true);
+
+
+
+useEffect(() => {
+  audioRef.current = new Audio("/assets/chant.mp3");
+}, []);
+
 
     useEffect(() => {
       console.log("scene monté");
@@ -238,10 +310,28 @@ export function Pentacle() {
   
     return (
       <>
+      {showIntroText && (
+  <div style={{
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    color: "white",
+    fontSize: "2rem",
+    fontFamily: "serif",
+    textAlign: "center",
+    opacity: cameraTraveling ? 1 : 0,
+    transition: "opacity 1s ease-in-out",
+    pointerEvents: "none",
+    zIndex: 1000
+  }}>
+    Le rituel va commencer. Préparez-vous à voter...
+  </div>
+)}
         <Canvas
           style={{ background: "black" }}
           gl={{ physicallyCorrectLights: true }}
-          camera={{ position: [0, 1, 7], fov: 65, near: 0.1, far: 200 }}
+          camera={{ position: [0, -1, 5], fov: 65, near: 0.1, far: 200 }}
         >
           <fog attach="fog" args={['black', 0, 120]} />
           <Environment preset="night" />
@@ -277,10 +367,13 @@ export function Pentacle() {
             position={[0, -3, 5]}
           /> */}
           <Suspense fallback={null}>
+            <CameraLerp setCameraTraveling={setCameraTraveling} audioRef={audioRef} />
             {/* Passage de la prop advanceGoat à Goat */}
+            <HellArena />
             <Goat  advanceGoat={advanceGoat} />
             <group position={[0.3, 2, -1]} scale={0.7}>
             <Pentacle />
+            {/* <FlameEffect position={[0, 0, 0]} scale={3} zoom={20.5} transparent depthWrite={false}/> */}
               <Marmitte />
               <PictureFrame 
                 image="/summon/wipr-filou1.png" 

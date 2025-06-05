@@ -1,33 +1,34 @@
 import { useEffect, useRef } from "react";
+import tmi from "tmi.js";
 
 export function useTwitchChat(onMessageReceived) {
   const callbackRef = useRef(onMessageReceived);
 
-  // Met à jour toujours la référence du callback
   useEffect(() => {
     callbackRef.current = onMessageReceived;
   }, [onMessageReceived]);
-  useEffect(() => {
-    console.log("useTwitchChat monté");
-  }, []);
-  useEffect(() => {
-    const eventSource = new EventSource("https://wipr-multiscenes-back.onrender.com/stream-chat");
 
-    const handleMessage = (event) => {
-      const data = JSON.parse(event.data);
-      callbackRef.current(data.message, data.user);
+  useEffect(() => {
+    console.log("useTwitchChat monté (frontend-only)");
+
+    const client = new tmi.Client({
+      connection: { reconnect: true },
+      channels: ["wipr"] // Nom de la chaîne à écouter
+    });
+
+    client.connect().catch(console.error);
+
+    const handleMessage = (channel, tags, message, self) => {
+      if (self) return;
+      console.log("Twitch message reçu :", tags.username, message);
+      callbackRef.current(message, tags.username);
     };
 
-    eventSource.addEventListener("message", handleMessage);
-
-    eventSource.onerror = (error) => {
-      console.error("Erreur de connexion SSE :", error);
-      eventSource.close();
-    };
+    client.on("message", handleMessage);
 
     return () => {
-      eventSource.removeEventListener("message", handleMessage);
-      eventSource.close();
+      client.removeListener("message", handleMessage);
+      client.disconnect();
     };
   }, []);
 }
