@@ -305,7 +305,7 @@ useEffect(() => {
 
 useEffect(() => {
   // Création et démarrage audio dès apparition du message
-  audioRef.current = new Audio("/assets/chant1.mp3");
+  audioRef.current = new Audio("/chant1.mp3");
   audioRef.current.volume = 0.5;
 
   audioRef.current.play().catch((e) => {
