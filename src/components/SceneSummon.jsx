@@ -222,7 +222,7 @@ function Pentacle() {
       }
       // Déplacement de la goat lors du sacrifice
       if (advanceGoat && goatRef.current) {
-        goatRef.current.position.z = THREE.MathUtils.lerp(goatRef.current.position.z, -70, 0.02);
+        goatRef.current.position.z = THREE.MathUtils.lerp(goatRef.current.position.z, -70, 0.01);
       }
     });
   
@@ -450,7 +450,7 @@ const resetScene = () => {
 
           <fog attach="fog" args={['black', 0, 120]} />
           <Environment preset="night" />
-          {/* <ambientLight intensity={0.5}/> */}
+          <ambientLight intensity={1.5}/>
          
 
 <EffectComposer>
