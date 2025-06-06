@@ -1,0 +1,32 @@
+.fade-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+}
+
+.fade-in {
+  animation: fadeIn ease-in-out forwards;
+}
+
+.fade-out {
+  animation: fadeOut ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

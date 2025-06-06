@@ -9,7 +9,7 @@ export function useTwitchChat(onMessageReceived) {
   }, [onMessageReceived]);
 
   useEffect(() => {
-    console.log("useTwitchChat monté (frontend-only)");
+    // console.log("useTwitchChat monté (frontend-only)");
 
     const client = new tmi.Client({
       connection: { reconnect: true },
@@ -20,7 +20,7 @@ export function useTwitchChat(onMessageReceived) {
 
     const handleMessage = (channel, tags, message, self) => {
       if (self) return;
-      console.log("Twitch message reçu :", tags.username, message);
+      // console.log("Twitch message reçu :", tags.username, message);
       callbackRef.current(message, tags.username);
     };
 

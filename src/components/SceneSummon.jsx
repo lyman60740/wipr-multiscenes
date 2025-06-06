@@ -107,7 +107,7 @@ function Pentacle() {
     if (pentacleRef.current && startTime.current !== null) {
       const elapsed = (Date.now() - startTime.current) / 1000; // en secondes
       let rotationSpeed;
-      const chrono = 60
+      const chrono = 90
 
       if (elapsed <= chrono) {
         // Accélération exponentielle durant les 10 premières secondes
@@ -280,7 +280,7 @@ function CameraLerp({ setCameraTraveling, audioRef, setStartVotes, startCameraLe
 
 
   
-  export default function SceneSummon() {
+  export default function SceneSummon( {onBack} ) {
     const audioRef = useRef();
     const [sacrified, setSacrified] = useState(null);
 const [advanceGoat, setAdvanceGoat] = useState(false);
@@ -298,7 +298,7 @@ useEffect(() => {
   if (startVotes) {
     const timer = setTimeout(() => {
       setVoteEnded(true);
-    }, 40000); // vote dure 40s ?
+    }, 90000);
     return () => clearTimeout(timer);
   }
 }, [startVotes]);
@@ -402,27 +402,49 @@ const resetScene = () => {
 )}
 {isSceneReady && (
   <>
-  <button
-    onClick={resetScene}
-    style={{
-      position: "absolute",
-      bottom: "1rem",
-      left: "20px",
-
-      padding: "1rem 2rem",
-      fontSize: "20px",
-      backgroundColor: "white",
-      color: "black",
-      border: "none",
-      borderRadius: "8px",
-      cursor: "pointer",
-      zIndex: 1000,
-      opacity: showScene ? 1 : 0,
-      transition: "opacity 0.5s ease",
-    }}
+  <div 
+  style={{
+    position: "absolute",
+    top: "20px",
+    left: "20px",
+    zIndex: 1001,
+    display: "flex",
+    alignItems: 'center',
+    gap:'32px'
+  }}
   >
-    🔁 Relancer le vote
-  </button>
+<div
+  onClick={onBack}
+  style={{
+    transform: 'rotate(-90deg)',
+    stroke: "none !important",
+    outline: "none !important",
+    cursor: "pointer",
+  }}
+  aria-label="Retour"
+>
+ <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M7 15.25L16 6.25L25 15.25M16 7.5V25.75" stroke="white" strokeWidth="3" strokeMiterlimit="10" strokeLinecap="square"/>
+</svg>
+
+</div>
+  <div
+    onClick={resetScene}
+     style={{
+    display: "flex",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+  }}
+  >
+   <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2.6665 16C2.6665 19.1826 3.93079 22.2348 6.18122 24.4853C8.43166 26.7357 11.4839 28 14.6665 28C17.8532 28 20.9065 26.7467 23.1998 24.5333L21.1998 22.5333C20.3604 23.4223 19.3474 24.1295 18.2236 24.6111C17.0998 25.0927 15.8891 25.3386 14.6665 25.3333C6.3465 25.3333 2.1865 15.28 8.0665 9.4C13.9465 3.52 23.9998 7.69333 23.9998 16H19.9998L25.3332 21.3333H25.4665L30.6665 16H26.6665C26.6665 12.8174 25.4022 9.76516 23.1518 7.51472C20.9013 5.26428 17.8491 4 14.6665 4C11.4839 4 8.43166 5.26428 6.18122 7.51472C3.93079 9.76516 2.6665 12.8174 2.6665 16Z" fill="white"/>
+</svg>
+
+
+  </div>
+  </div>
+   
 <div style={{
     position: "absolute",
     bottom: "20px",

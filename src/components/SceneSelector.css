@@ -1,33 +1,46 @@
-.selector {
+.home {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: black;
+  box-sizing: border-box;
   color: white;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   z-index: 999;
   gap: 30px;
+      padding-bottom: 14%;
+  /* display: none; */
 }
 
-.selector button:nth-child(1), .selector button:nth-child(3) {
-    pointer-events: none;
-    opacity: 0.5;
+.home__selector {
+  display: flex;
+  gap: 56px;
 }
-
-.selector button {
-  background: #111;
-  border: 2px solid white;
-  color: white;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
+.home__selector div {
+  font-size: 24px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-
-.selector button:hover {
-  background: #444;
+.disabled_event {
+  opacity: 0.5;
+  /* pointer-events: none; */
+  position: relative;
+  width: max-content;
 }
+.disabled_event span:nth-child(2) {
+  font-size: 16px;
+}
+/* .disabled_event::after {
+  content: 'soon';
+  font-size: 16px;
+  position: absolute;
+  bottom: 0;
+  top: 50%;
+  transform: translate(calc(100% + 8px), -50%);
+} */

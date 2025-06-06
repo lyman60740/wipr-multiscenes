@@ -5,47 +5,46 @@ import SceneSummon from "./components/SceneSummon";
 import SceneProphecy from "./components/SceneProphecy";
 import UIOverlay from "./components/UIOverlay";
 import SceneSelector from "./components/SceneSelector";
+import FadeTransition from "./components/FadeTransition";
+import "./index.css";
 
 export default function App() {
   const { currentScene, setScene, setShowUI, showUI } = useSceneStore();
   const [sceneSelected, setSceneSelected] = useState(false);
 
- const handleSceneSelect = (scene) => {
-  const audio = new Audio("/chant.mp3");
-  audio.volume = 0.5;
-  window.__audio = audio; // 🔊 on stocke l'audio globalement
-
-  setScene(scene);
-  setSceneSelected(true);
+  const handleSceneSelect = (scene) => {
+    const audio = new Audio("/chant.mp3");
+    audio.volume = 0.5;
+    window.__audio = audio;
+    setScene(scene);
+    setSceneSelected(true);
+  };
+  const onBack = () => {
+  setSceneSelected(false);
+  setScene(null);       // ou setScene("") si c’est un string vide par défaut
+  setShowUI(false);     // optionnel si tu veux masquer l’UI
 };
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Tab") {
-        event.preventDefault();
-        setShowUI(true);
-      }
-    };
-    const handleKeyUp = (event) => {
-      if (event.key === "Tab") {
-        event.preventDefault();
-        setShowUI(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [setShowUI]);
 
+  // rendu
   return (
     <>
-      {!sceneSelected && <SceneSelector onSelect={handleSceneSelect} />}
-      {sceneSelected && currentScene === "curse" && <SceneCurse />}
-      {sceneSelected && currentScene === "summon" && <SceneSummon />}
-      {sceneSelected && currentScene === "prophecy" && <SceneProphecy />}
+      <FadeTransition visible={!sceneSelected}>
+        <SceneSelector onSelect={handleSceneSelect} />
+      </FadeTransition>
+
+      <FadeTransition visible={sceneSelected && currentScene === "curse"}>
+        <SceneCurse />
+      </FadeTransition>
+
+      <FadeTransition visible={sceneSelected && currentScene === "summon"}>
+        <SceneSummon onBack={onBack}/>
+      </FadeTransition>
+
+      <FadeTransition visible={sceneSelected && currentScene === "prophecy"}>
+        <SceneProphecy />
+      </FadeTransition>
+
       {sceneSelected && showUI && <UIOverlay />}
     </>
   );

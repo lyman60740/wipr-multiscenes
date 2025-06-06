@@ -1,5 +1,12 @@
+@font-face {
+  font-family: 'SK';
+  src: url('/fonts/Sk-Modernist-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
-  font-family: "Josefin Sans", sans-serif;
+  font-family:"SK", "Josefin Sans";
   line-height: 1.5;
   font-weight: 400;
 
@@ -12,7 +19,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Outfit:wght@100..900&display=swap');
 a {
   font-weight: 500;
   color: #646cff;
@@ -30,7 +36,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: black;
-  font-family: "Josefin Sans", sans-serif;
+  font-family:"SK", "Josefin Sans";
 }
 
 h1 {
@@ -64,3 +70,11 @@ canvas {
   height: 100vh;
 }
 
+#intro-text {
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
+}
+
+#intro-text.fade-out {
+  opacity: 0;
+}
