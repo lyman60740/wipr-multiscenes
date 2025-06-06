@@ -46,7 +46,7 @@ export function VoteMessages3D({ onSacrifice, startVotes }) {
         setTopVotes(
           Object.entries(updated)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
+            .slice(0, 5)
         );
         return updated;
       });
@@ -109,7 +109,7 @@ export function VoteMessages3D({ onSacrifice, startVotes }) {
             Classement :
           </Text>
           {topVotes.map(([pseudo, count], index) => (
-            <Text key={pseudo} position={[0, -(index + 1) * 0.2, 0]} fontSize={0.30} color="white" anchorX="left" anchorY="middle" font="/fonts/CloisterBlack.ttf">
+            <Text key={pseudo} position={[0, -(index + 1) * 0.2, 0]} fontSize={0.20} color="white" anchorX="left" anchorY="middle" font="/fonts/CloisterBlack.ttf">
               {index + 1}. {pseudo} : {count} vote{count > 1 ? "s" : ""}
             </Text>
           ))}
